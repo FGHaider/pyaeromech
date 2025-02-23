@@ -1,0 +1,2 @@
+class UnknownBoundary(Exception):
+    pass
