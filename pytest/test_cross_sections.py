@@ -8,4 +8,4 @@ def test_geometries():
     D = 10
     d = 5
     
-    assert rectangle(b,h).A() == 200
+    assert rectangle(b,h).A == 200
