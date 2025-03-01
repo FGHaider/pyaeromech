@@ -1,5 +1,5 @@
 import pytest
-from src.pyaeromech.cross_sections import rectangle, circle, circle_tube
+from pyaeromech.cross_sections import rectangle, circle, circle_tube
 
 def test_geometries():
     b = 10

@@ -1,6 +1,6 @@
 
 import numpy as np
-from exceptions import UnknownBoundary
+from pyaeromech.exceptions import UnknownBoundary
 
 def euler_beam_buckling_load(E:float, I:float, L:float, boundary: str):
     

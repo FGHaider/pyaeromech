@@ -1,5 +1,5 @@
 import numpy as np
-from exceptions import UnknownType
+from pyaeromech.exceptions import UnknownType
 
 #PARAMETRIC STUDIES ON THE EFFECT OF
 #FOUR TYPES OF FASTENER MODELING IN

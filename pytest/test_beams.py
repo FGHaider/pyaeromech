@@ -1,6 +1,6 @@
 import pytest
-from src.pyaeromech.beams import euler_beam_buckling_load
-from src.pyaeromech.exceptions import UnknownBoundary
+from pyaeromech.beams import euler_beam_buckling_load
+from pyaeromech.exceptions import UnknownBoundary
 
 def test_buckling():
     
