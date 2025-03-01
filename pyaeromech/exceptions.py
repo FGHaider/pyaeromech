@@ -3,3 +3,6 @@ class UnknownBoundary(Exception):
 
 class UnknownType(Exception):
     pass
+
+class OutsideRange(Exception):
+    pass

@@ -10,12 +10,15 @@ The goal of the package is to provide the basics, no FE just some of the more fu
 - Basics
 - Geometry
 - Vibrations
+- Concentrations
 - Components
     - Beams
     - Fasteners
     - Springs
 
 ### Basics
+
+The basics include some standard material data, this data is intended for simple comparisons.
 
 #### Margin of Safety
 
