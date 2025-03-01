@@ -1,15 +1,19 @@
 [<img src="https://img.shields.io/badge/Status-In Development-orange.svg?logo=LOGO">](<LINK>)
 
 # pyaeromech
-Python package implementating basic analytical functions focused on mechanical engineering for aerospace applications.  Utilizing ESA and NASA standards for reference. 
+Python package implementating basic analytical functions focused on mechanical engineering for aerospace applications. Utilizing ESA and NASA standards for reference. 
 
-## Subpackages
+The goal of the package is to provide the basics, no FE just some of the more fundamental formulas, parts and equations. Neatly packaged and verified so you can focus on the goal of project rather than doublechecking someone did not mess up the definition of margin of safety.
+
+## Functionality
 
 - Basics
-- Beams
 - Geometry
-- Fasteners
 - Vibrations
+- Components
+    - Beams
+    - Fasteners
+    - Springs
 
 ### Basics
 

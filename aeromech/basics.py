@@ -2,6 +2,19 @@
 import numpy as np
 
 
+def modulus_rigidity(E:float, v:float):
+    """_summary_
+
+    Args:
+        E (float): _description_
+        v (float): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    return E/(2*(1+v))
+
+
 def ms(load:float, limit:float, sf:float) -> float:
     
     return limit/(sf*load) - 1
