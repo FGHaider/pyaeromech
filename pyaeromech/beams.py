@@ -14,6 +14,6 @@ def euler_beam_buckling_load(E:float, I:float, L:float, boundary: str):
         case "fixed_latfree":
             K = 2.0
         case _:
-            UnknownBoundary(f"The boundary {boundary} is not known, should be entered as 'boundary_boundary' for the top and bottom")
+            raise(UnknownBoundary(f"The boundary {boundary} is not known, should be entered as 'boundary_boundary' for the top and bottom"))
             
     return np.pi**2 * E * I / (K * L)**2
