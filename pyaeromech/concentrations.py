@@ -3,7 +3,9 @@ import numpy as np
 from pyaeromech.exceptions import OutsideRange
 
     
-def Kt_calc(h, r, D, C):
+def __concentration_calc(h: float, r: float, D: float, C: np.ndarray) -> float:
+    """Generic function for stress concentrations"""
+    
     ratio = h/r
     coefficients = C[:,0] + C[:,1]*np.sqrt(ratio) + C[:,2]*ratio
     C1 = coefficients[0]
@@ -13,7 +15,20 @@ def Kt_calc(h, r, D, C):
     ratio = 2*h/D
     return C1 + C2*ratio + C3*ratio**2 + C4*ratio**3
         
-def SquareShoulderFilletRectangularSection(L, D, r, h, loadtype):
+def square_shoulder_fillet_rect_section(L: float, D: float, r: float, h: float, loadtype:str) -> float:
+    """Calculates the concentration factor for a square shoulder with fillet in a member of
+    rectangular section. See Roark 7th Edition Table 17.1.5
+
+    Args:
+        L (float): Distance between fillet roots
+        D (float): Width of section
+        r (float): Radius of fillet
+        h (float): Thickness of section
+        loadtype (str): Loading type, axial_tension or in_plane_bending
+
+    Returns:
+        float: Concentration factor
+    """
     ratio = h/r
     if L/D < 3/((r/(D-2*h))**(1/4)):
         raise("The ratio L/D is outside the valid limits")
@@ -45,11 +60,22 @@ def SquareShoulderFilletRectangularSection(L, D, r, h, loadtype):
     else:
         raise(OutsideRange("The ratio h/r is outside the valid limits"))
     
-    return Kt_calc(h, r, D, C)
+    return __concentration_calc(h, r, D, C)
         
     
-def TwoUNotchesRectangularSection(h, r, D, loadtype):
+def two_u_notches_rect_section(h: float, r: float, D: float, loadtype:str) -> float:
+    """Calculates the concentration factor for two u-notches in a member of rectangular section. 
+    See Roark 7th Edition Table 17.1.1
 
+    Args:
+        h (float): Depth of u-notch
+        r (float): Radius of u-notch root
+        D (float): Width of rectangular section
+        loadtype (str): Loading type, axial_tension, out_of_plane_bending or in_plane_bending
+
+    Returns:
+        float: Concentration factor
+    """
     ratio = h/r
     
     if loadtype == "axial_tension":
@@ -93,10 +119,22 @@ def TwoUNotchesRectangularSection(h, r, D, loadtype):
         raise(OutsideRange("The ratio h/r is outside the valid limits"))
     
 
-    return Kt_calc(h, r, D, C)
+    return __concentration_calc(h, r, D, C)
 
     
-def SingleUNotchRectangularSection(h, r, D, loadtype):
+def single_u_notch_rect_section(h: float, r: float, D: float, loadtype:str) -> float:
+    """_summary_
+    See Roark 7th Edition Table 17.1.3
+
+    Args:
+        h (float): _description_
+        r (float): _description_
+        D (float): _description_
+        loadtype (str): _description_
+
+    Returns:
+        float: _description_
+    """
     ratio = h/r
     
     if loadtype == "axial_tension":
@@ -120,12 +158,24 @@ def SingleUNotchRectangularSection(h, r, D, loadtype):
     else:
         raise(OutsideRange("The ratio h/r is outside the valid limits"))
     
-    return Kt_calc(h, r, D, C)
+    return __concentration_calc(h, r, D, C)
         
     
-def SingleVNotchRectangularSection(h, r, D, theta):
+def single_v_notch_rect_section(h: float, r: float, D: float, theta:str) -> float:
+    """_summary_
+    See Roark 7th Edition Table 17.1.4
+
+    Args:
+        h (float): _description_
+        r (float): _description_
+        D (float): _description_
+        theta (str): _description_
+
+    Returns:
+        float: _description_
+    """
     ratio = 2*h/D
-    Ktu = SingleUNotchRectangularSection(h,r,D, loadtype="in_plane_bending")
+    Ktu = single_u_notch_rect_section(h,r,D, loadtype="in_plane_bending")
     
     if theta <= 150:
         KtTheta = 1.11*Ktu - (0.0275 + 0.1125 * (theta/150)**4)*Ktu**2
@@ -137,10 +187,21 @@ def SingleVNotchRectangularSection(h, r, D, theta):
     return Kt
         
     
-def TwoVNotchesRectangularSection(h, r, D, theta) -> None:
+def two_v_notches_rect_section(h: float, r: float, D: float, theta: float) -> float:
+    """_summary_
+    See Roark 7th Edition Table 17.1.2
 
+    Args:
+        h (float): _description_
+        r (float): _description_
+        D (float): _description_
+        theta (float): _description_
+
+    Returns:
+        float: _description_
+    """
     ratio = 2*h/D
-    Ktu = TwoUNotchesRectangularSection(h,r,D, loadtype="axial_tension")
+    Ktu = two_u_notches_rect_section(h,r,D, loadtype="axial_tension")
     
     if ratio == 0.4 and theta <= 120:
         KtTheta = 1.11*Ktu - (0.0275 + 0.000145*theta + 0.00164 * (theta/120)**8)*Ktu**2
@@ -151,128 +212,3 @@ def TwoVNotchesRectangularSection(h, r, D, theta) -> None:
     
     Kt = min(Ktu, KtTheta)
     return Kt
-        
-
-def sigma_nom(M, t, d):
-
-    return 6*M/(t*d**2)
-
-
-def rectangular_bar_with_notches(w, h, r): # Does not seem to align with Roarks, seventh edition?
-    """
-    Source: 
-    :param w:
-    :param h:
-    :param r:
-    :return:
-    """
-
-    a_set = h/r
-    Kt_set = np.empty(a_set.shape)
-
-    for idx, a in enumerate(a_set):
-        if 0.1 <= a <= 2.0:
-            C1 = 1.024 + 2.092*np.sqrt(a) - 0.051*a
-            C2 = -0.630 - 7.194*np.sqrt(a) + 1.288*a
-            C3 = 2.117 + 8.574*np.sqrt(a) - 2.160*a
-            C4 = -1.420 - 3.494*np.sqrt(a) + 0.932*a
-        elif 2.0 <= a <= 50.0:
-            C1 = 1.113 + 1.957*np.sqrt(a)
-            C2 = -2.579 - 4.017*np.sqrt(a) - 0.013*a
-            C3 = 4.100 + 3.922*np.sqrt(a) + 0.083*a
-            C4 = -1.528 - 1.893*np.sqrt(a) - 0.066*a
-        else:
-            raise OutsideRange("Outside valid range")
-
-        hw = h[idx]/w
-        Kt_set[idx] = C1 + C2*(2*hw) + C3*(2*hw)**2 + C4*(2*hw)**3
-
-    return Kt_set
-
-
-def rectangular_single_notch_bending(h, D, r):
-    """_summary_
-
-    Args:
-        h (_type_): _description_
-        D (_type_): _description_
-        r (_type_): _description_
-
-    Raises:
-        OutsideRange: _description_
-
-    Returns:
-        _type_: _description_
-    """
-    a_set = h/r
-    Kt_set = np.empty(a_set.shape)
-
-    for idx, a in enumerate(a_set):
-        if a == 1:
-            C1 = 2.988
-            C2 = -7.735
-            C3 = 10.674
-            C4 = -4.927
-        elif 0.5 <= a <= 4.0:
-            C1 = 0.721 + 2.394*np.sqrt(a) - 0.127*a
-            C2 = -0.426 - 8.827*np.sqrt(a) + 1.518*a
-            C3 = 2.161 + 10.968*np.sqrt(a) - 2.455*a
-            C4 = -1.456 - 4.535*np.sqrt(a) + 1.064*a
-        else:
-            raise OutsideRange("Outside valid range")
-
-        hw = h[idx]/D
-        Kt_set[idx] = C1 + C2*(2*hw) + C3*(2*hw)**2 + C4*(2*hw)**3
-
-    return Kt_set
-
-
-def rectangular_bar_with_fillet(D, d, r):
-    """
-    Source: 
-    :param D:
-    :param d:
-    :param r:
-    :return:
-    """
-
-    h = (D-d)/2
-
-    if isinstance(r, np.ndarray):
-        a_set = h/r
-        Kt_set = np.empty(a_set.shape)
-
-        for idx, a in enumerate(a_set):
-            if 0.1 <= a <= 2.0:
-                C1 = 1.007 + 1.000*np.sqrt(a) - 0.031*a
-                C2 = -0.270 - 2.404*np.sqrt(a) + 0.749*a
-                C3 = 0.677 + 1.133*np.sqrt(a) - 0.904*a
-                C4 = -0.414 - 0.271*np.sqrt(a) + 0.186*a
-            elif 2.0 <= a <= 20.0:
-                C1 = 1.042 + 0.982*np.sqrt(a) - 0.036*a
-                C2 = -3.599 + 1.619*np.sqrt(a) - 0.431*a
-                C3 = 6.084 - 5.607*np.sqrt(a) + 1.158*a
-                C4 = -2.527 + 3.006*np.sqrt(a) - 0.691*a
-            else:
-                raise OutsideRange("Outside valid range")
-            hD = h/D
-            Kt_set[idx] = C1 + C2*(2*hD) + C3*(2*hD)**2 + C4*(2*hD)**3
-    else:
-        a = h/r
-
-        if 0.1 <= a <= 2.0:
-            C1 = 1.007 + 1.000*np.sqrt(a) - 0.031*a
-            C2 = -0.270 - 2.404*np.sqrt(a) + 0.749*a
-            C3 = 0.677 + 1.133*np.sqrt(a) - 0.904*a
-            C4 = -0.414 - 0.271*np.sqrt(a) + 0.186*a
-        elif 2.0 <= a <= 20.0:
-            C1 = 1.042 + 0.982*np.sqrt(a) - 0.036*a
-            C2 = -3.599 + 1.619*np.sqrt(a) - 0.431*a
-            C3 = 6.084 - 5.607*np.sqrt(a) + 1.158*a
-            C4 = -2.527 + 3.006*np.sqrt(a) - 0.691*a
-        else:
-            raise OutsideRange("Outside valid range")
-        hD = h/D
-        Kt_set = C1 + C2*(2*hD) + C3*(2*hD)**2 + C4*(2*hD)**3
-
-    return Kt_set
